@@ -1,4 +1,4 @@
-HTTP.methods
+HTTP.methods [![Build Status](https://travis-ci.org/raix/Meteor-http-methods.png?branch=master)](https://travis-ci.org/raix/Meteor-http-methods)
 ============
 
 This package add the abillity to add `HTTP` server methods to your project. It's a server-side package only *- no client simulations added.*
