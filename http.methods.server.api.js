@@ -7,6 +7,7 @@ PUT /note/:id
 DELETE /note/:id
 
 */
+XHTTP = {};
 
 var url = Npm.require('url');
 
@@ -134,7 +135,7 @@ _methodHTTP.getMethod = function(name) {
 };
 
 // Public interface
-HTTP.methods = function(newMethods) {
+XHTTP.methods = function(newMethods) {
   _.each(newMethods, function(func, name) {
     if (_methodHTTP.nameFollowsConventions(name)) {
       // Check if we got a function
