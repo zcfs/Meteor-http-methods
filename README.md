@@ -24,7 +24,7 @@ The methods scope contains different kinds of inputs. We can also get user detai
 * `this.setUserId(id)` - Option for setting the `this.userId`
 * `this.isSimulation` - Allways false on the server
 * `this.unblock` - Not implemented
-* `this.setContentType` - Set the content type in header, defaults to text/html
+* `this.setContentType('text/html')` - Set the content type in header, defaults to text/html
 * `this.setStatusCode(200)` - Set the status code in response header
 
 ##Passing data via header
@@ -42,7 +42,8 @@ HTTP Server method:
   HTTP.methods({
     'list': function(data) {
       if (data.foo === 'bar') {
-        /* data i passed via the header is parsed by EJSON.parse if not able then it returns the raw data instead */
+        /* data i passed via the header is parsed by EJSON.parse if
+        not able then it returns the raw data instead */
       }
       return 'Hello';
     }
@@ -51,7 +52,7 @@ HTTP Server method:
 
 ##Authentication
 The client needs the user `_id` and `access_token` to login in HTTP methods. *One could create a HTTP login/logout method for allowing pure external access*
-Example:
+
 Client
 ```js
   HTTP.call('POST', '/hello/', {
@@ -78,6 +79,7 @@ Server
 
 ##Parametres
 The method name or url can be used to pass `params` values to the method.
+
 Client
 ```js
   HTTP.call('POST', '/items/12/emails/5', function(err, result) {
