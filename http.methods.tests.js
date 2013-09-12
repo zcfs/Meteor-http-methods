@@ -25,9 +25,9 @@ Tinytest.add('HTTP - methods - getNameList', function(test) {
   test.equal(EJSON.stringify(_methodHTTP.getNameList()), '[]', 'Name list failed');
   test.equal(EJSON.stringify(_methodHTTP.getNameList('')), '[]', 'Name list failed');
   test.equal(EJSON.stringify(_methodHTTP.getNameList('/')), '[]', 'Name list failed');
-  test.equal(EJSON.stringify(_methodHTTP.getNameList('//')), '[]', 'Name list failed');
+  test.equal(EJSON.stringify(_methodHTTP.getNameList('//')), '["",""]', 'Name list failed');
 
-  test.equal(EJSON.stringify(_methodHTTP.getNameList('/1/')), '["1"]', 'Name list failed');
+  test.equal(EJSON.stringify(_methodHTTP.getNameList('/1/')), '["1",""]', 'Name list failed');
   test.equal(EJSON.stringify(_methodHTTP.getNameList('/1/2')), '["1","2"]', 'Name list failed');
   test.equal(EJSON.stringify(_methodHTTP.getNameList('/1/:name/2')), '["1",":name","2"]', 'Name list failed');
   test.equal(EJSON.stringify(_methodHTTP.getNameList('/1//2')), '["1","","2"]', 'Name list failed');
@@ -76,8 +76,8 @@ Tinytest.add('HTTP - methods - getMethod', function(test) {
   _methodHTTP.addToMethodTree('login');
   test.equal(EJSON.stringify(_methodHTTP.getMethod('login')), '{"name":"/login/","params":{}}', 'getMethod failed');
   test.equal(EJSON.stringify(_methodHTTP.getMethod('/login')), '{"name":"/login/","params":{}}', 'getMethod failed');
-  test.equal(EJSON.stringify(_methodHTTP.getMethod('login/')), '{"name":"/login/","params":{}}', 'getMethod failed');
-  test.equal(EJSON.stringify(_methodHTTP.getMethod('/login/')), '{"name":"/login/","params":{}}', 'getMethod failed');
+  test.equal(EJSON.stringify(_methodHTTP.getMethod('login/')), 'null', 'getMethod failed');
+  test.equal(EJSON.stringify(_methodHTTP.getMethod('/login/')), 'null', 'getMethod failed');
   test.equal(EJSON.stringify(_methodHTTP.getMethod('login/test')), 'null', 'getMethod failed');
 
   _methodHTTP.addToMethodTree('/login/');

@@ -25,7 +25,7 @@ _methodHTTP.nameFollowsConventions = function(name) {
 
 _methodHTTP.getNameList = function(name) {
   // Remove leading and trailing slashes and make command array
-  name = name && name.replace(/^\/|\/$/g, '') || '';
+  name = name && name.replace(/^\//g, '') || ''; // /^\/|\/$/g
   return name && name.split('/') || [];
 };
 
