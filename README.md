@@ -87,6 +87,7 @@ Client
   });
 ```
 
+Server
 ```js
   HTTP.methods({
     '/items/:itemId/emails/:emailId': function() {
