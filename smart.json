@@ -3,7 +3,7 @@
   "description": "Adds HTTP server methods - http.methods",
   "homepage": "https://github.com/raix/Meteor-http-methods",
   "author": "Morten Henriksen  (http://gi-software.com)",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "git": "https://github.com/raix/Meteor-http-methods.git",
   "packages": {
   }
