@@ -30,7 +30,7 @@ The methods scope contains different kinds of inputs. We can also get user detai
 ##Passing data via header
 From the client:
 ```js
-  HTTP.call('POST', '/list/', {
+  HTTP.call('POST', 'list', {
     data: { foo: 'bar' }
   }, function(err, result) {
     console.log('Content: ' + result.content + ' === "Hello"');
@@ -55,7 +55,7 @@ The client needs the user `_id` and `access_token` to login in HTTP methods. *On
 
 Client
 ```js
-  HTTP.call('POST', '/hello/', {
+  HTTP.call('POST', '/hello', {
     params: {
       id: Meteor.userId(),
       token: Accounts && Accounts._storedLoginToken()
@@ -67,7 +67,7 @@ Client
 
 Server
 ```js
-  '/hello/': function(data) {
+  'hello': function(data) {
     if (this.userId) {
       var user = Meteor.users.findOne({ _id: this.userId });
       return 'Hello ' + (user && user.username || user && user.emails[0].address || 'user');
