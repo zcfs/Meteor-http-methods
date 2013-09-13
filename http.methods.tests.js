@@ -4,8 +4,8 @@ function equals(a, b) {
 
 Tinytest.add('HTTP - methods - test environment', function(test) {
   test.isTrue(typeof _methodHTTP !== 'undefined', 'test environment not initialized _methodHTTP');
-  test.isTrue(typeof XHTTP !== 'undefined', 'test environment not initialized _methodHTTP');
-  test.isTrue(typeof XHTTP.methods !== 'undefined', 'test environment not initialized _methodHTTP');
+  test.isTrue(typeof HTTP !== 'undefined', 'test environment not initialized _methodHTTP');
+  test.isTrue(typeof HTTP.methods !== 'undefined', 'test environment not initialized _methodHTTP');
 
 });
 

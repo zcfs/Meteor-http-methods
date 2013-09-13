@@ -7,7 +7,7 @@ PUT /note/:id
 DELETE /note/:id
 
 */
-XHTTP = {};
+HTTP = Package.http && Package.http.HTTP || {};
 
 var url = Npm.require('url');
 
@@ -18,8 +18,7 @@ _methodHTTP.methodHandlers = {};
 _methodHTTP.methodTree = {};
 
 _methodHTTP.nameFollowsConventions = function(name) {
-  // TODO: Expand check to follow URI name specs or test name to follow
-  // Meteor.Collection naming convention
+  // Check that name is string, not a falsy or empty
   return name && name === '' + name && name !== '';
 };
 
@@ -41,8 +40,8 @@ _methodHTTP.createObject = function(keys, values) {
   return result;
 };
 
-_methodHTTP.addToMethodTree = function(name) {
-  var list = _methodHTTP.getNameList(name);
+_methodHTTP.addToMethodTree = function(methodName) {
+  var list = _methodHTTP.getNameList(methodName);
   var name = '/';
   // Contains the list of params names
   var params = [];
@@ -134,8 +133,9 @@ _methodHTTP.getMethod = function(name) {
   }
 };
 
-// Public interface
-XHTTP.methods = function(newMethods) {
+// Public interface for adding server-side http methods - if setting a method to
+// 'false' it would actually remove the method (can be used to unpublish a method)
+HTTP.methods = function(newMethods) {
   _.each(newMethods, function(func, name) {
     if (_methodHTTP.nameFollowsConventions(name)) {
       // Check if we got a function
@@ -173,6 +173,8 @@ var sendError = function(res, code, message) {
   res.end(message);
 };
 
+// This handler collects the header data into either an object (if json) or the
+// raw data. The data is passed to the callback
 var requestHandler = function(req, res, callback) {
   if (typeof callback !== 'function') {
     return null;
@@ -203,8 +205,8 @@ var requestHandler = function(req, res, callback) {
         result = EJSON.parse(body);
       }
     } catch(err) {
-      // throw new Error('Error in requestHandler parsing data, Error: ' + err.message);
-      result = body;  
+      // Could not parse so we return the raw data
+      result = body;
     }
 
     try {
@@ -219,8 +221,10 @@ var requestHandler = function(req, res, callback) {
 // Handle the actual connection
 WebApp.connectHandlers.use(function(req, res, next) {
 
+  // Check to se if this is a http method call
   var method = _methodHTTP.getMethod(req._parsedUrl.pathname);
 
+  // If method is null then it wasn't and we pass the request along
   if (method === null) {
     return next();
   }
@@ -228,24 +232,29 @@ WebApp.connectHandlers.use(function(req, res, next) {
   requestHandler(req, res, function(data) {
     var methodReference = method.name;
 
-    // If methodsHandler not found or somehow the methodshandler is not a function then
-    // return a 404
+    // If methodsHandler not found or somehow the methodshandler is not a
+    // function then return a 404
     if (!_methodHTTP.methodHandlers[methodReference] || typeof _methodHTTP.methodHandlers[methodReference] !== 'function') {
       sendError(res, 404, 'Error HTTP method handler "' + methodReference + '" is not a function');
       return;
     }
 
-
-    var self = {
+    // Set fiber scope
+    var fiberScope = {
+      // Pointers to Request / Response
       req: req,
       res: res,
+      // Request / Response helpers
       statusCode: 200,
-      query: req.query,
+      contentType: 'text/html',
       method: req.method,
+      // Arguments
       data: data,
+      query: req.query,
       params: method.params,
-      callback: _methodHTTP.methodHandlers[methodReference],
-      reference: methodReference
+      // Method reference
+      reference: methodReference,
+      callback: _methodHTTP.methodHandlers[methodReference]
     };
 
     // Helper functions this scope
@@ -254,10 +263,6 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // We fetch methods data from methodsHandler, the handler uses the this.addItem()
       // function to populate the methods, this way we have better check control and
       // better error handling + messages
-
-      var resultObject = {
-        contentType: 'text/html',
-      };
 
       // The scope for the user callback
       var thisScope = {
@@ -281,7 +286,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
         unblock: function() {},
         // Set the content type in header, defaults to text/html?
         setContentType: function(type) {
-          resultObject.contentType = type;
+          self.contentType = type;
         },
         setStatusCode: function(code) {
           self.statusCode = code;
@@ -291,29 +296,29 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // Check authentication
       var userToken = self.query.token;
       var userId = self.query.id;
+
       // Check if we are handed strings
       try {
         userToken && check(userToken, String);
         userId && check(userId, String);
       } catch(err) {
         sendError(res, 404, 'Error user token and id not of type strings, Error: ' + (err.stack || err.message));
-        return;           
+        return;
       }
 
-      // Look up user to check if user exists and is loggedin via token
-      var user = Meteor.users.findOne({ _id: userId, 'services.resume.loginTokens.token': userToken });
+      // Set the this.userId
+      if (userId && userToken) {
+        // Look up user to check if user exists and is loggedin via token
+        var user = Meteor.users.findOne({ _id: userId, 'services.resume.loginTokens.token': userToken });
 
-      // Set the userId in the scope
-      thisScope.userId = user && user._id;
+        // Set the userId in the scope
+        thisScope.userId = user && user._id;
+      }
 
-      // Get id if any
-      // Should be parsed out of the url
-      // eg. /note/:id
-      thisScope._id = null;
-
+      var result;
       // Get a result back to send to the client
       try {
-        var result = self.callback.apply(thisScope, [self.data]) || '';
+        result = self.callback.apply(thisScope, [self.data]) || '';
       } catch(err) {
         sendError(res, 503, 'Error in method "' + self.reference + '", Error: ' + (err.stack || err.message) );
         return;
@@ -323,7 +328,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
       if (self.statusCode === 200) {
         var resultBuffer = new Buffer(result);
 
-        self.res.setHeader('Content-Type', resultObject.contentType);
+        self.res.setHeader('Content-Type', self.contentType);
         self.res.setHeader('Content-Length', resultBuffer.length);
         self.res.end(resultBuffer);
       } else {
@@ -335,7 +340,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
     });
     // Run http methods handler
     try {
-      runServerMethod.run(self);
+      runServerMethod.run(fiberScope);
     } catch(err) {
       sendError(res, 500, 'Error running the server http method handler, Error: ' + (err.stack || err.message));
     }

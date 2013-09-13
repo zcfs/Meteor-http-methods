@@ -1,7 +1,7 @@
 Package.describe({
-    summary: '\u001b[32mv0.0.3\n'+
+    summary: '\u001b[32mv0.0.4\n'+
          '\u001b[33m-----------------------------------------\n'+
-         '\u001b[0m Adds XHTTP.methods                       \n'+
+         '\u001b[0m Adds HTTP.methods                        \n'+
          '\u001b[0m                                          \n'+
          '\u001b[33m-------------------------------------RaiX\n'
 });
@@ -10,7 +10,9 @@ Package.on_use(function(api) {
   'use strict';
   api.use(['webapp', 'underscore', 'ejson'], 'server');
 
-  api.export && api.export('XHTTP');
+  api.use('http', { weak: true });
+
+  api.export && api.export('HTTP');
 
   api.export && api.export('_methodHTTP', { testOnly: true });
 

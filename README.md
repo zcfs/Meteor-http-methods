@@ -1,12 +1,12 @@
-XHTTP.methods [![Build Status](https://travis-ci.org/raix/Meteor-http-methods.png?branch=master)](https://travis-ci.org/raix/Meteor-http-methods)
+HTTP.methods [![Build Status](https://travis-ci.org/raix/Meteor-http-methods.png?branch=master)](https://travis-ci.org/raix/Meteor-http-methods)
 ============
 
 This package add the abillity to add `HTTP` server methods to your project. It's a server-side package only *- no client simulations added.*
 
 ##Usage
-XHTTP.methods can be added
+HTTP.methods can be added
 ```js
-  XHTTP.methods({
+  HTTP.methods({
     'list': function() {
       return '<b>Default content type is text/html</b>';
     }
@@ -39,7 +39,7 @@ From the client:
 
 HTTP Server method:
 ```js
-  XHTTP.methods({
+  HTTP.methods({
     'list': function(data) {
       if (data.foo === 'bar') {
         /* data i passed via the header is parsed by EJSON.parse if
@@ -89,7 +89,7 @@ Client
 
 Server
 ```js
-  XHTTP.methods({
+  HTTP.methods({
     '/items/:itemId/emails/:emailId': function() {
       // this.param.itemId === '12'
       // this.param.emailId === '5'
