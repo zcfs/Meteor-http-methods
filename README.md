@@ -30,7 +30,7 @@ The methods scope contains different kinds of inputs. We can also get user detai
 ##Passing data via header
 From the client:
 ```js
-  HTTP.call('POST', 'list', {
+  HTTP.post('list', {
     data: { foo: 'bar' }
   }, function(err, result) {
     console.log('Content: ' + result.content + ' === "Hello"');
@@ -50,12 +50,32 @@ HTTP Server method:
   });
 ```
 
+##Parametres
+The method name or url can be used to pass `params` values to the method.
+
+Client
+```js
+  HTTP.post('/items/12/emails/5', function(err, result) {
+    console.log('Got back: ' + result.content);
+  });
+```
+
+Server
+```js
+  HTTP.methods({
+    '/items/:itemId/emails/:emailId': function() {
+      // this.param.itemId === '12'
+      // this.param.emailId === '5'
+    }
+  });
+```
+
 ##Authentication
 The client needs the user `_id` and `access_token` to login in HTTP methods. *One could create a HTTP login/logout method for allowing pure external access*
 
 Client
 ```js
-  HTTP.call('POST', '/hello', {
+  HTTP.post('/hello', {
     params: {
       id: Meteor.userId(),
       token: Accounts && Accounts._storedLoginToken()
@@ -77,22 +97,14 @@ Server
   }
 ```
 
-##Parametres
-The method name or url can be used to pass `params` values to the method.
+##Login and logout (TODO)
+These operations are not currently supported for off Meteor use - Theres some security considerations.
 
-Client
-```js
-  HTTP.call('POST', '/items/12/emails/5', function(err, result) {
-    console.log('Got back: ' + result.content);
-  });
-```
+`basic-auth` is broadly supported, but:
+* password should not be sent in clear text - hash with base64?
+* should be used on https connections
+* Its difficult / impossible to logout a user?
 
-Server
-```js
-  HTTP.methods({
-    '/items/:itemId/emails/:emailId': function() {
-      // this.param.itemId === '12'
-      // this.param.emailId === '5'
-    }
-  });
-```
+`token` the current `clientId` / `access_token` seems to be a better solution. Better control and options to logout users. But calling the initial `login` method still requires:
+* hashing of password
+* use https
