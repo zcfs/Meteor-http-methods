@@ -70,14 +70,39 @@ Server
   });
 ```
 
+##Extended usage
+The `HTTP.methods` normally takes a function, but it can be set to an object for fingrained handling.
+
+Example:
+```js
+  HTTP.methods({
+    '/hello': {
+      get: function(data) {},
+      // post: function(data) {},
+      // put: function(data) {},
+      // delete: function(data) {}
+    }
+  });
+```
+*In this example the mounted http rest point will only support the `get` method*
+
+Example:
+```js
+  HTTP.methods({
+    '/hello': {
+      method: function(data) {},
+    }
+  });
+```
+*In this example all methods `get`, `put`, `post`, `delete` will use the same function - This would be equal to setting the function directly on the http mount point*
+
 ##Authentication
-The client needs the user `_id` and `access_token` to login in HTTP methods. *One could create a HTTP login/logout method for allowing pure external access*
+The client needs the `access_token` to login in HTTP methods. *One could create a HTTP login/logout method for allowing pure external access*
 
 Client
 ```js
   HTTP.post('/hello', {
     params: {
-      id: Meteor.userId(),
       token: Accounts && Accounts._storedLoginToken()
     }
   }, function(err, result) {
@@ -97,6 +122,36 @@ Server
   }
 ```
 
+##Using custom authentication
+It's possible to make your own function to set the userId - not using the builtin token pattern.
+```js
+  // My auth will return the userId
+  var myAuth = function() {
+    // Read the token from '/hello?token=5'
+    var userToken = self.query.token;
+    // Check the userToken before adding it to the db query
+    // Set the this.userId
+    if (userToken) {
+      var user = Meteor.users.findOne({ 'services.resume.loginTokens.token': userToken });
+
+      // Set the userId in the scope
+      return user && user._id;
+    }  
+  };
+
+  HTTP.methods({
+    '/hello': {
+      auth: myAuth,
+      method: function(data) {
+        // this.userId is set by myAuth
+        if (this.userId) { /**/ } else { /**/ }
+      }
+    }
+  });
+```
+*The above resembles the builtin auth handler*
+
+
 ##Login and logout (TODO)
 These operations are not currently supported for off Meteor use - Theres some security considerations.
 
@@ -105,6 +160,6 @@ These operations are not currently supported for off Meteor use - Theres some se
 * should be used on https connections
 * Its difficult / impossible to logout a user?
 
-`token` the current `clientId` / `access_token` seems to be a better solution. Better control and options to logout users. But calling the initial `login` method still requires:
+`token` the current `access_token` seems to be a better solution. Better control and options to logout users. But calling the initial `login` method still requires:
 * hashing of password
 * use https

@@ -14,6 +14,7 @@ var url = Npm.require('url');
 // Primary local test scope
 _methodHTTP = {};
 
+
 _methodHTTP.methodHandlers = {};
 _methodHTTP.methodTree = {};
 
@@ -100,7 +101,7 @@ _methodHTTP.getMethod = function(name) {
   for (var i = 0; i < list.length; i++) {
     // get the key name
     var key = list[i];
-    // We expect to find the key or :value if not we break 
+    // We expect to find the key or :value if not we break
     if (typeof currentMethodTree[key] !== 'undefined' ||
             typeof currentMethodTree[':value'] !== 'undefined') {
       // We got a result now check if its a value
@@ -118,7 +119,7 @@ _methodHTTP.getMethod = function(name) {
 
     // Dig deeper
     currentMethodTree = currentMethodTree[key];
-  } 
+  }
 
   // Extract reference pointer
   var reference = currentMethodTree && currentMethodTree[':ref'];
@@ -133,13 +134,50 @@ _methodHTTP.getMethod = function(name) {
   }
 };
 
+// This method retrieves the userId from the token and makes sure that the token
+// is valid and not expired
+_methodHTTP.getUserId = function() {
+  var self = this;
+
+  // // Get ip, x-forwarded-for can be comma seperated ips where the first is the
+  // // client ip
+  // var ip = self.req.headers['x-forwarded-for'] &&
+  //         // Return the first item in ip list
+  //         self.req.headers['x-forwarded-for'].split(',')[0] ||
+  //         // or return the remoteAddress
+  //         self.req.connection.remoteAddress;
+
+  // Check authentication
+  var userToken = self.query.token;
+
+  // Check if we are handed strings
+  try {
+    userToken && check(userToken, String);
+  } catch(err) {
+    throw new Meteor.Error(404, 'Error user token and id not of type strings, Error: ' + (err.stack || err.message));
+  }
+
+  // Set the this.userId
+  if (userToken) {
+    // Look up user to check if user exists and is loggedin via token
+    var user = Meteor.users.findOne({ 'services.resume.loginTokens.token': userToken });
+    // TODO: check 'services.resume.loginTokens.when' to have the token expire
+
+    // Set the userId in the scope
+    return user && user._id;
+  }
+
+  return null;
+};
+
+
 // Public interface for adding server-side http methods - if setting a method to
 // 'false' it would actually remove the method (can be used to unpublish a method)
 HTTP.methods = function(newMethods) {
   _.each(newMethods, function(func, name) {
     if (_methodHTTP.nameFollowsConventions(name)) {
       // Check if we got a function
-      if (typeof func === 'function') {
+      //if (typeof func === 'function') {
         var method = _methodHTTP.addToMethodTree(name);
         // The func is good
         if (typeof _methodHTTP.methodHandlers[method.name] !== 'undefined') {
@@ -154,13 +192,58 @@ HTTP.methods = function(newMethods) {
             throw new Error('HTTP method "' + name + '" is allready registred');
           }
         } else {
+          // We could have a function or a object
+          // The object could have:
+          // '/test/': {
+          //   auth: function() ... returning the userId using over default
+          //
+          //   method: function() ...
+          //   or
+          //   post: function() ...
+          //   put:
+          //   get:
+          //   delete:
+          // }
+
+          /*
+          We conform to the object format:
+          {
+            auth:
+            post:
+            put:
+            get:
+            delete:
+          }
+          This way we have a uniform reference
+          */
+
+          var uniObj = {};
+          if (typeof func === 'function') {
+            uniObj = {
+              'auth': _methodHTTP.getUserId,
+              'POST': func,
+              'PUT': func,
+              'GET': func,
+              'DELETE': func
+            };
+          } else {
+            uniObj = {
+              'auth': func.auth || _methodHTTP.getUserId,
+              'POST': func.post || func.method,
+              'PUT': func.put || func.method,
+              'GET': func.get || func.method,
+              'DELETE': func.delete || func.method
+            };
+          }
+
           // Registre the method
-          _methodHTTP.methodHandlers[method.name] = func;
+          _methodHTTP.methodHandlers[method.name] = uniObj; // func;
+
         }
-      } else {
-        // We do require a function as a function to execute later
-        throw new Error('HTTP.methods failed: ' + name + ' is not a function');
-      }
+      // } else {
+      //   // We do require a function as a function to execute later
+      //   throw new Error('HTTP.methods failed: ' + name + ' is not a function');
+      // }
     } else {
       // We have to follow the naming spec defined in nameFollowsConventions
       throw new Error('HTTP.method "' + name + '" invalid naming of method');
@@ -234,8 +317,8 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
     // If methodsHandler not found or somehow the methodshandler is not a
     // function then return a 404
-    if (!_methodHTTP.methodHandlers[methodReference] || typeof _methodHTTP.methodHandlers[methodReference] !== 'function') {
-      sendError(res, 404, 'Error HTTP method handler "' + methodReference + '" is not a function');
+    if (typeof _methodHTTP.methodHandlers[methodReference] === 'undefined') {
+      sendError(res, 404, 'Error HTTP method handler "' + methodReference + '" is not found');
       return;
     }
 
@@ -254,7 +337,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
       params: method.params,
       // Method reference
       reference: methodReference,
-      callback: _methodHTTP.methodHandlers[methodReference]
+      methodObject: _methodHTTP.methodHandlers[methodReference],
     };
 
     // Helper functions this scope
@@ -264,7 +347,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // function to populate the methods, this way we have better check control and
       // better error handling + messages
 
-      // The scope for the user callback
+      // The scope for the user methodObject callbacks
       var thisScope = {
         // The user whos id and token was used to run this method, if set/found
         userId: null,
@@ -293,47 +376,46 @@ WebApp.connectHandlers.use(function(req, res, next) {
         }
       };
 
-      // Check authentication
-      var userToken = self.query.token;
-      var userId = self.query.id;
+      var methodCall = self.methodObject[self.method];
 
-      // Check if we are handed strings
-      try {
-        userToken && check(userToken, String);
-        userId && check(userId, String);
-      } catch(err) {
-        sendError(res, 404, 'Error user token and id not of type strings, Error: ' + (err.stack || err.message));
-        return;
-      }
+      // If the method call is set for the POST/PUT/GET or DELETE then run the
+      // respective methodCall if its a function
+      if (typeof methodCall === 'function') {
 
-      // Set the this.userId
-      if (userId && userToken) {
-        // Look up user to check if user exists and is loggedin via token
-        var user = Meteor.users.findOne({ _id: userId, 'services.resume.loginTokens.token': userToken });
+        // Get the userId - This is either set as a method specific handler and
+        // will allways default back to the builtin getUserId handler
+        try {
+          // Try to set the userId
+          thisScope.userId = self.methodObject.auth.apply(self);
+        } catch(err) {
+          sendError(res, err.error, (err.message || err.stack));
+          return;
+        }
 
-        // Set the userId in the scope
-        thisScope.userId = user && user._id;
-      }
+        // Get the result of the methodCall
+        var result;
+        // Get a result back to send to the client
+        try {
+          result = methodCall.apply(thisScope, [self.data]) || '';
+        } catch(err) {
+          sendError(res, 503, 'Error in method "' + self.reference + '", Error: ' + (err.stack || err.message) );
+          return;
+        }
 
-      var result;
-      // Get a result back to send to the client
-      try {
-        result = self.callback.apply(thisScope, [self.data]) || '';
-      } catch(err) {
-        sendError(res, 503, 'Error in method "' + self.reference + '", Error: ' + (err.stack || err.message) );
-        return;
-      }
+        // If OK / 200 then Return the result
+        if (self.statusCode === 200) {
+          var resultBuffer = new Buffer(result);
 
-      // If OK / 200 then Return the result
-      if (self.statusCode === 200) {
-        var resultBuffer = new Buffer(result);
+          self.res.setHeader('Content-Type', self.contentType);
+          self.res.setHeader('Content-Length', resultBuffer.length);
+          self.res.end(resultBuffer);
+        } else {
+          // Allow user to alter the status code and send a message
+          sendError(res, self.statusCode, result);
+        }
 
-        self.res.setHeader('Content-Type', self.contentType);
-        self.res.setHeader('Content-Length', resultBuffer.length);
-        self.res.end(resultBuffer);
       } else {
-        // Allow user to alter the status code and send a message
-        sendError(res, self.statusCode, result);
+        sendError(res, 404, 'Service not found');
       }
 
 
