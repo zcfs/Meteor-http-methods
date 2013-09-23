@@ -27,6 +27,14 @@ _methodHTTP.nameFollowsConventions = function(name) {
 _methodHTTP.getNameList = function(name) {
   // Remove leading and trailing slashes and make command array
   name = name && name.replace(/^\//g, '') || ''; // /^\/|\/$/g
+  // TODO: Get the format from the url - eg.: "/list/45.json" format should be
+  // set in this function by splitting the last list item by . and have format
+  // as the last item. How should we toggle:
+  // "/list/45/item.name.json" and "/list/45/item.name"?
+  // We would either have to check all known formats or allways determin the "."
+  // as an extension. Resolving in "json" and "name" as handed format - the user
+  // Could simply just add the format as a parametre? or be explicit about
+  // naming
   return name && name.split('/') || [];
 };
 
