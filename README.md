@@ -21,6 +21,7 @@ The methods scope contains different kinds of inputs. We can also get user detai
 * `this.method` - `GET`, `POST`, `PUT`, `DELETE`
 * `this.query` - query params `?token=1&id=2` -> { token: 1, id: 2 }
 * `this.params` - Set params /foo/:name/test/:id -> { name: '', id: '' }
+* `this.userAgent` - Get the useragent string set in request header
 * `this.setUserId(id)` - Option for setting the `this.userId`
 * `this.isSimulation` - Allways false on the server
 * `this.unblock` - Not implemented

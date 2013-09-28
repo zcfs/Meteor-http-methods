@@ -1,6 +1,6 @@
 Package.describe({
     summary: 'Adds HTTP.methods\n'+
-         '\u001b[32mv0.0.7\n'+
+         '\u001b[32mv0.0.8\n'+
          '\u001b[33m-----------------------------------------\n'+
          '\u001b[0m Adds HTTP.methods                        \n'+
          '\u001b[0m                                          \n'+

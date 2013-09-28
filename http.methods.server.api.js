@@ -367,6 +367,8 @@ WebApp.connectHandlers.use(function(req, res, next) {
         params: self.params,
         // Method GET, PUT, POST, DELETE
         method: self.method,
+        // User agent
+        userAgent: req.headers['user-agent'],
         // Set the userId
         setUserId: function(id) {
           this.userId = id;
