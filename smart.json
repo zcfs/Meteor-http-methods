@@ -1,9 +1,9 @@
 {
   "name": "http-methods",
-  "description": "Adds HTTP server methods - HTTP.methods",
+  "description": "Adds HTTP server methods - HTTP.methods RESTful",
   "homepage": "https://github.com/raix/Meteor-http-methods",
   "author": "Morten Henriksen  (http://gi-software.com)",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "git": "https://github.com/raix/Meteor-http-methods.git",
   "packages": {
   }
