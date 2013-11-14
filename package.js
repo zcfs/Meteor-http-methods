@@ -1,10 +1,5 @@
 Package.describe({
-    summary: 'Adds HTTP.methods RESTful\n'+
-         '\u001b[32mv0.0.9\n'+
-         '\u001b[33m-----------------------------------------\n'+
-         '\u001b[0m Adds HTTP.methods                        \n'+
-         '\u001b[0m RESTful methods                          \n'+
-         '\u001b[33m-------------------------------------RaiX\n'
+    summary: 'Adds HTTP.methods RESTful'
 });
 
 Package.on_use(function(api) {
