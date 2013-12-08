@@ -26,6 +26,7 @@ The methods scope contains different kinds of inputs. We can also get user detai
 * `this.isSimulation` - Allways false on the server
 * `this.unblock` - Not implemented
 * `this.setContentType('text/html')` - Set the content type in header, defaults to text/html
+* `this.addHeader('Content-Disposition', 'attachment; filename="name.ext"')`
 * `this.setStatusCode(200)` - Set the status code in response header
 
 ##Passing data via header

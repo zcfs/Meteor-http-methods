@@ -337,8 +337,11 @@ WebApp.connectHandlers.use(function(req, res, next) {
       res: res,
       // Request / Response helpers
       statusCode: 200,
-      contentType: 'text/html',
       method: req.method,
+      // Headers for response
+      headers: {
+        'Content-Type': 'text/html'  // Set default type
+      },
       // Arguments
       data: data,
       query: req.query,
@@ -379,10 +382,13 @@ WebApp.connectHandlers.use(function(req, res, next) {
         unblock: function() {},
         // Set the content type in header, defaults to text/html?
         setContentType: function(type) {
-          self.contentType = type;
+          self.headers['Content-Type'] = type;
         },
         setStatusCode: function(code) {
           self.statusCode = code;
+        },
+        addHeader: function(key, value) {
+          self.headers[key] = value;
         }
       };
 
@@ -415,9 +421,15 @@ WebApp.connectHandlers.use(function(req, res, next) {
         // If OK / 200 then Return the result
         if (self.statusCode === 200) {
           var resultBuffer = new Buffer(result);
-
-          self.res.setHeader('Content-Type', self.contentType);
-          self.res.setHeader('Content-Length', resultBuffer.length);
+          // Check if user wants to overwrite content length for some reason?
+          if (typeof self.headers['Content-Length'] === 'undefined') {
+            self.headers['Content-Length'] = resultBuffer.length;
+          }
+          // Set headers
+          _.each(self.headers, function(value, key) {
+            self.res.setHeader(key, value);
+          });
+          // End response
           self.res.end(resultBuffer);
         } else {
           // Allow user to alter the status code and send a message
