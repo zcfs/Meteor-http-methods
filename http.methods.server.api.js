@@ -432,6 +432,13 @@ WebApp.connectHandlers.use(function(req, res, next) {
           // End response
           self.res.end(resultBuffer);
         } else {
+          // Set headers
+          _.each(self.headers, function(value, key) {
+            // If value is defined then set the header, this allows for unsetting
+            // the default content-type
+            if (typeof value !== 'undefined')
+              self.res.setHeader(key, value);
+          });
           // Allow user to alter the status code and send a message
           sendError(res, self.statusCode, result);
         }
