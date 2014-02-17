@@ -189,7 +189,7 @@ HTTP.methods = function(newMethods) {
         var method = _methodHTTP.addToMethodTree(name);
         // The func is good
         if (typeof _methodHTTP.methodHandlers[method.name] !== 'undefined') {
-          if (_methodHTTP.methodHandlers[method.name] === false) {
+          if (func === false) {
             // If the method is set to false then unpublish
             delete _methodHTTP.methodHandlers[method.name];
             // Delete the reference in the _methodHTTP.methodTree
@@ -197,7 +197,7 @@ HTTP.methods = function(newMethods) {
             delete method.params;
           } else {
             // We should not allow overwriting - following Meteor.methods
-            throw new Error('HTTP method "' + name + '" is allready registred');
+            throw new Error('HTTP method "' + name + '" is already registered');
           }
         } else {
           // We could have a function or a object
@@ -372,6 +372,8 @@ WebApp.connectHandlers.use(function(req, res, next) {
         method: self.method,
         // User agent
         userAgent: req.headers['user-agent'],
+        // All request headers
+        requestHeaders: req.headers,
         // Set the userId
         setUserId: function(id) {
           this.userId = id;
