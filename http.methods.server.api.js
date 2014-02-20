@@ -271,13 +271,25 @@ var requestHandler = function(req, res, callback) {
     return null;
   }
 
-  var body = '';
+  var body = '', bufferData = [], dataLen = 0;
 
   // Extract the body
   req.on('data', function(data) {
-    body += data;
-    if (body.length > 1e6) {
+    var cancel = false;
+    if (typeof data === "string") {
+      body += data;
+      if (body.length > 1e6) {
+        cancel = true;
+      }
+    } else if (data instanceof Buffer) {
+      bufferData.push(data); 
+      dataLen += data.length;
+    }
+    
+    if (cancel) {
       body = '';
+      dataLen = 0;
+      bufferData = [];
       // Flood attack or faulty client
       sendError(res, 413, 'Flood attack or faulty client');
       req.connection.destroy();
@@ -291,13 +303,21 @@ var requestHandler = function(req, res, callback) {
     }
     // Convert the body into json and extract the data object
     var result = {};
-    try {
-      if (body !== '') {
-        result = EJSON.parse(body);
+    if (dataLen) {
+      result = new Buffer(dataLen); 
+      for (var i = 0, ln = bufferData.length, pos = 0; i < ln; i++) { 
+        bufferData[i].copy(result, pos); 
+        pos += bufferData[i].length; 
+      } 
+    } else {
+      try {
+        if (body !== '') {
+          result = EJSON.parse(body);
+        }
+      } catch(err) {
+        // Could not parse so we return the raw data
+        result = body;
       }
-    } catch(err) {
-      // Could not parse so we return the raw data
-      result = body;
     }
 
     try {
