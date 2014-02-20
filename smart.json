@@ -3,7 +3,7 @@
 	"description": "Adds HTTP server methods - HTTP.methods RESTful",
 	"homepage": "https://github.com/CollectionFS/Meteor-http-methods",
 	"author": "Morten Henriksen  (http://gi-software.com)",
-	"version": "0.0.13",
+	"version": "0.0.14",
 	"git": "https://github.com/CollectionFS/Meteor-http-methods.git",
 	"packages": {}
 }
