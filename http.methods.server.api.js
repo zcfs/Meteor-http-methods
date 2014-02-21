@@ -168,7 +168,12 @@ _methodHTTP.getUserId = function() {
   // Set the this.userId
   if (userToken) {
     // Look up user to check if user exists and is loggedin via token
-    var user = Meteor.users.findOne({ 'services.resume.loginTokens.token': userToken });
+    var user = Meteor.users.findOne({
+        $or: [
+          {'services.resume.loginTokens.hashedToken': Accounts._hashLoginToken(userToken)},
+          {'services.resume.loginTokens.token': userToken}
+        ]
+      });
     // TODO: check 'services.resume.loginTokens.when' to have the token expire
 
     // Set the userId in the scope
