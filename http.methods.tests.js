@@ -41,11 +41,11 @@ Tinytest.add('HTTP - methods - createObject', function(test) {
   test.equal(EJSON.stringify(_methodHTTP.createObject(2, 4)), '{}', 'createObject failed');
   test.equal(EJSON.stringify(_methodHTTP.createObject(['foo'], [])), '{"foo":""}', 'createObject failed');
   test.equal(EJSON.stringify(_methodHTTP.createObject(['foo'], ['bar'])), '{"foo":"bar"}', 'createObject failed');
-  test.equal(EJSON.stringify(_methodHTTP.createObject(['foo'], [3])), '{"foo":3}', 'createObject failed');
+  test.equal(EJSON.stringify(_methodHTTP.createObject(['foo'], [3])), '{"foo":"3"}', 'createObject failed');
   test.equal(EJSON.stringify(_methodHTTP.createObject(['foo'], ['bar', 3])), '{"foo":"bar"}', 'createObject failed');
-  test.equal(EJSON.stringify(_methodHTTP.createObject(['foo', 'foo'], ['bar', 3])), '{"foo":3}', 'createObject failed');
+  test.equal(EJSON.stringify(_methodHTTP.createObject(['foo', 'foo'], ['bar', 3])), '{"foo":"3"}', 'createObject failed');
   test.equal(EJSON.stringify(_methodHTTP.createObject([''], ['bar', 3])), '{"":"bar"}', 'createObject failed');
-  test.equal(EJSON.stringify(_methodHTTP.createObject(['', ''], ['bar', 3])), '{"":3}', 'createObject failed');
+  test.equal(EJSON.stringify(_methodHTTP.createObject(['', ''], ['bar', 3])), '{"":"3"}', 'createObject failed');
 });
 
 Tinytest.add('HTTP - methods - addToMethodTree', function(test) {
@@ -60,13 +60,13 @@ Tinytest.add('HTTP - methods - addToMethodTree', function(test) {
   _methodHTTP.methodTree = {};
   _methodHTTP.addToMethodTree('/foo/:name/bar');
   test.equal(EJSON.stringify(_methodHTTP.methodTree), '{"foo":{":value":{"bar":{":ref":{"name":"/foo/:value/bar/","params":["name"]}}}}}', 'addToMethodTree failed');
-  
+
   _methodHTTP.addToMethodTree('/foo/:name/bar');
   test.equal(EJSON.stringify(_methodHTTP.methodTree), '{"foo":{":value":{"bar":{":ref":{"name":"/foo/:value/bar/","params":["name"]}}}}}', 'addToMethodTree failed');
 
   _methodHTTP.addToMethodTree('/foo/name/bar');
   test.equal(EJSON.stringify(_methodHTTP.methodTree), '{"foo":{":value":{"bar":{":ref":{"name":"/foo/:value/bar/","params":["name"]}}},"name":{"bar":{":ref":{"name":"/foo/name/bar/","params":[]}}}}}', 'addToMethodTree failed');
-  
+
   _methodHTTP.methodTree = {};
 });
 
