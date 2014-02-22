@@ -18,6 +18,10 @@ _methodHTTP = {};
 _methodHTTP.methodHandlers = {};
 _methodHTTP.methodTree = {};
 
+// This could be changed eg. could allow larger data chunks than 1.000.000
+// 5mb = 5 * 1024 * 1024 = 5242880;
+_methodHTTP.maxDataLength = 5242880; //1e6;
+
 _methodHTTP.nameFollowsConventions = function(name) {
   // Check that name is string, not a falsy or empty
   return name && name === '' + name && name !== '';
@@ -276,23 +280,16 @@ var requestHandler = function(req, res, callback) {
     return null;
   }
 
-  var body = '', bufferData = [], dataLen = 0;
+  // Container for buffers and a sum of the length
+  var bufferData = [], dataLen = 0;
 
   // Extract the body
   req.on('data', function(data) {
-    var cancel = false;
-    if (typeof data === "string") {
-      body += data;
-      if (body.length > 1e6) {
-        cancel = true;
-      }
-    } else if (data instanceof Buffer) {
-      bufferData.push(data); 
-      dataLen += data.length;
-    }
-    
-    if (cancel) {
-      body = '';
+    bufferData.push(data);
+    dataLen += data.length;
+
+    // We have to check the data length in order to spare the server
+    if (dataLen > _methodHTTP.maxDataLength) {
       dataLen = 0;
       bufferData = [];
       // Flood attack or faulty client
@@ -306,23 +303,30 @@ var requestHandler = function(req, res, callback) {
     if (res.finished) {
       return;
     }
-    // Convert the body into json and extract the data object
-    var result = {};
-    if (dataLen) {
-      result = new Buffer(dataLen); 
-      for (var i = 0, ln = bufferData.length, pos = 0; i < ln; i++) { 
-        bufferData[i].copy(result, pos); 
-        pos += bufferData[i].length; 
-      } 
-    } else {
-      try {
-        if (body !== '') {
-          result = EJSON.parse(body);
-        }
-      } catch(err) {
-        // Could not parse so we return the raw data
-        result = body;
+
+    // Allow the result to be undefined if so
+    var result;
+
+    // If data found the work it - either buffer or json
+    if (dataLen > 0) {
+      result = new Buffer(dataLen);
+      // Merge the chunks into one buffer
+      for (var i = 0, ln = bufferData.length, pos = 0; i < ln; i++) {
+        bufferData[i].copy(result, pos);
+        pos += bufferData[i].length;
+        delete bufferData[i];
       }
+      // Check if we could be dealing with json
+      if (result[0] == 0x7b && result[1] === 0x22) {
+        try {
+          // Convert the body into json and extract the data object
+          result = EJSON.parse(result.toString());
+        } catch(err) {
+          // Could not parse so we return the raw data
+        }
+      }
+    } else {
+      // Result will be undefined
     }
 
     try {
