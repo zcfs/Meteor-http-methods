@@ -43,7 +43,7 @@ _methodHTTP.createObject = function(keys, values) {
   var result = {};
   if (keys && values) {
     for (var i = 0; i < keys.length; i++) {
-      result[keys[i]] = decodeURIComponent(values[i]) || '';
+      result[keys[i]] = values[i] && decodeURIComponent(values[i]) || '';
     }
   }
   return result;
