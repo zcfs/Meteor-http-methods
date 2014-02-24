@@ -49,6 +49,7 @@ Tinytest.add('HTTP - methods - createObject', function(test) {
 });
 
 Tinytest.add('HTTP - methods - addToMethodTree', function(test) {
+  var original = _methodHTTP.methodTree;
   _methodHTTP.methodTree = {};
   _methodHTTP.addToMethodTree('login');
   test.equal(EJSON.stringify(_methodHTTP.methodTree), '{"login":{":ref":{"name":"/login/","params":[]}}}', 'addToMethodTree failed');
@@ -67,7 +68,7 @@ Tinytest.add('HTTP - methods - addToMethodTree', function(test) {
   _methodHTTP.addToMethodTree('/foo/name/bar');
   test.equal(EJSON.stringify(_methodHTTP.methodTree), '{"foo":{":value":{"bar":{":ref":{"name":"/foo/:value/bar/","params":["name"]}}},"name":{"bar":{":ref":{"name":"/foo/name/bar/","params":[]}}}}}', 'addToMethodTree failed');
 
-  _methodHTTP.methodTree = {};
+  _methodHTTP.methodTree = original;
 });
 
 Tinytest.add('HTTP - methods - getMethod', function(test) {
