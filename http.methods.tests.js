@@ -2,14 +2,14 @@ function equals(a, b) {
   return !!(EJSON.stringify(a) === EJSON.stringify(b));
 }
 
-Tinytest.add('HTTP - methods - test environment', function(test) {
+Tinytest.add('http-methods - test environment', function(test) {
   test.isTrue(typeof _methodHTTP !== 'undefined', 'test environment not initialized _methodHTTP');
   test.isTrue(typeof HTTP !== 'undefined', 'test environment not initialized _methodHTTP');
   test.isTrue(typeof HTTP.methods !== 'undefined', 'test environment not initialized _methodHTTP');
 
 });
 
-Tinytest.add('HTTP - methods - nameFollowsConventions', function(test) {
+Tinytest.add('http-methods - nameFollowsConventions', function(test) {
   test.isFalse(_methodHTTP.nameFollowsConventions(), 'Tested methods naming convention 1');
   test.isFalse(_methodHTTP.nameFollowsConventions(''), 'Tested methods naming convention 2');
   test.isFalse(_methodHTTP.nameFollowsConventions({}), 'Tested methods naming convention 3');
@@ -23,7 +23,7 @@ Tinytest.add('HTTP - methods - nameFollowsConventions', function(test) {
   test.isTrue(_methodHTTP.nameFollowsConventions('test/test'), 'Tested methods naming convention');
 });
 
-Tinytest.add('HTTP - methods - getNameList', function(test) {
+Tinytest.add('http-methods - getNameList', function(test) {
   test.equal(EJSON.stringify(_methodHTTP.getNameList()), '[]', 'Name list failed');
   test.equal(EJSON.stringify(_methodHTTP.getNameList('')), '[]', 'Name list failed');
   test.equal(EJSON.stringify(_methodHTTP.getNameList('/')), '[]', 'Name list failed');
@@ -36,7 +36,7 @@ Tinytest.add('HTTP - methods - getNameList', function(test) {
 });
 
 
-Tinytest.add('HTTP - methods - createObject', function(test) {
+Tinytest.add('http-methods - createObject', function(test) {
   test.equal(EJSON.stringify(_methodHTTP.createObject()), '{}', 'createObject failed');
   test.equal(EJSON.stringify(_methodHTTP.createObject(2, 4)), '{}', 'createObject failed');
   test.equal(EJSON.stringify(_methodHTTP.createObject(['foo'], [])), '{"foo":""}', 'createObject failed');
@@ -48,7 +48,7 @@ Tinytest.add('HTTP - methods - createObject', function(test) {
   test.equal(EJSON.stringify(_methodHTTP.createObject(['', ''], ['bar', 3])), '{"":"3"}', 'createObject failed');
 });
 
-Tinytest.add('HTTP - methods - addToMethodTree', function(test) {
+Tinytest.add('http-methods - addToMethodTree', function(test) {
   var original = _methodHTTP.methodTree;
   _methodHTTP.methodTree = {};
   _methodHTTP.addToMethodTree('login');
@@ -71,7 +71,7 @@ Tinytest.add('HTTP - methods - addToMethodTree', function(test) {
   _methodHTTP.methodTree = original;
 });
 
-Tinytest.add('HTTP - methods - getMethod', function(test) {
+Tinytest.add('http-methods - getMethod', function(test) {
   // Basic tests
   test.equal(EJSON.stringify(_methodHTTP.getMethod('')), 'null', 'getMethod failed');
   test.equal(EJSON.stringify(_methodHTTP.getMethod('//')), 'null', 'getMethod failed');
@@ -94,7 +94,6 @@ Tinytest.add('HTTP - methods - getMethod', function(test) {
   _methodHTTP.addToMethodTree('/login/:name/foo');
   test.equal(EJSON.stringify(_methodHTTP.getMethod('login/bar/foo')), '{"name":"/login/:value/foo/","params":{"name":"bar"}}', 'getMethod failed');
   test.equal(EJSON.stringify(_methodHTTP.getMethod('login/foo')), '{"name":"/login/foo/","params":{}}', 'getMethod failed');
-
 
 });
 
