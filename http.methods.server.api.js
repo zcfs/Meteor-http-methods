@@ -10,6 +10,7 @@ DELETE /note/:id
 HTTP = Package.http && Package.http.HTTP || {};
 
 var url = Npm.require('url');
+var stream = Npm.require('stream');
 
 // Primary local test scope
 _methodHTTP = {};
@@ -457,17 +458,27 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
         // If OK / 200 then Return the result
         if (self.statusCode === 200) {
-          var resultBuffer = new Buffer(result);
-          // Check if user wants to overwrite content length for some reason?
-          if (typeof self.headers['Content-Length'] === 'undefined') {
-            self.headers['Content-Length'] = resultBuffer.length;
-          }
           // Set headers
           _.each(self.headers, function(value, key) {
             self.res.setHeader(key, value);
           });
-          // End response
-          self.res.end(resultBuffer);
+          // Check if we have a stream
+          if (typeof result.pipe === 'function' && typeof result.on === 'function') {
+            // Simply pipe the data
+            result.pipe(self.res);
+            // TODO: Add stream error handler
+            // XXX: result.on('error', function() {})
+          } else {
+            // Or some data
+            var resultBuffer = new Buffer(result);
+            // Check if user wants to overwrite content length for some reason?
+            if (typeof self.headers['Content-Length'] === 'undefined') {
+              self.headers['Content-Length'] = resultBuffer.length;
+            }
+            // End response
+            self.res.end(resultBuffer);
+
+          }
         } else {
           // Set headers
           _.each(self.headers, function(value, key) {
