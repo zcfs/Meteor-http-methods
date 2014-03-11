@@ -139,7 +139,8 @@ _methodHTTP.getMethod = function(name) {
   if (typeof reference !== 'undefined') {
     return {
       name: reference.name,
-      params: _methodHTTP.createObject(reference.params, values)
+      params: _methodHTTP.createObject(reference.params, values),
+      handle: _methodHTTP.methodHandlers[reference.name]
     };
   } else {
     // Did not get any reference to the method
@@ -239,6 +240,7 @@ HTTP.methods = function(newMethods) {
           if (typeof func === 'function') {
             uniObj = {
               'auth': _methodHTTP.getUserId,
+              'stream': false,
               'POST': func,
               'PUT': func,
               'GET': func,
@@ -246,6 +248,7 @@ HTTP.methods = function(newMethods) {
             };
           } else {
             uniObj = {
+              'stream': func.stream || false,
               'auth': func.auth || _methodHTTP.getUserId,
               'POST': func.post || func.method,
               'PUT': func.put || func.method,
@@ -339,6 +342,16 @@ var requestHandler = function(req, res, callback) {
 
 };
 
+// This is the simplest handler - it simply passes req stream as data to the
+// method
+var streamHandler = function(req, res, callback) {
+  try {
+    callback(req);
+  } catch(err) {
+    sendError(res, 500, 'Error in requestHandler callback, Error: ' + (err.stack || err.message) );
+  }
+};
+
 // Handle the actual connection
 WebApp.connectHandlers.use(function(req, res, next) {
 
@@ -350,13 +363,13 @@ WebApp.connectHandlers.use(function(req, res, next) {
     return next();
   }
 
-  requestHandler(req, res, function(data) {
-    var methodReference = method.name;
+  var dataHandle = (method.handle.stream)?streamHandler:requestHandler;
 
+  dataHandle(req, res, function(data) {
     // If methodsHandler not found or somehow the methodshandler is not a
     // function then return a 404
-    if (typeof _methodHTTP.methodHandlers[methodReference] === 'undefined') {
-      sendError(res, 404, 'Error HTTP method handler "' + methodReference + '" is not found');
+    if (typeof method.handle === 'undefined') {
+      sendError(res, 404, 'Error HTTP method handler "' + method.name + '" is not found');
       return;
     }
 
@@ -377,8 +390,8 @@ WebApp.connectHandlers.use(function(req, res, next) {
       query: req.query,
       params: method.params,
       // Method reference
-      reference: methodReference,
-      methodObject: _methodHTTP.methodHandlers[methodReference],
+      reference: method.name,
+      methodObject: method.handle,
     };
 
     // Helper functions this scope
@@ -462,8 +475,8 @@ WebApp.connectHandlers.use(function(req, res, next) {
           _.each(self.headers, function(value, key) {
             self.res.setHeader(key, value);
           });
-          // Check if we have a stream
-          if (typeof result.pipe === 'function' && typeof result.on === 'function') {
+          // Check if we allow and have a stream
+          if (self.methodObject.stream && typeof result.pipe === 'function' && typeof result.on === 'function') {
             // Simply pipe the data
             result.pipe(self.res);
             // TODO: Add stream error handler
