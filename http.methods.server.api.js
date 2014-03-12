@@ -509,7 +509,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
           // We wait until the user has finished reading
           if (self.isReadStreaming) {
-            console.log('Read stream');
+            // console.log('Read stream');
             req.on('end', function() {
               streamsWaiting--;
               // If no streams are waiting
@@ -524,7 +524,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
           // We wait until the user has finished writing
           if (self.isWriteStreaming) {
-            console.log('Write stream');
+            // console.log('Write stream');
           } else {
             // If we are done reading the buffer - eg. not streaming
             if (streamsWaiting == 0) res.end(resultBuffer);
