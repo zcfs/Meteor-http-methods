@@ -346,7 +346,7 @@ var requestHandler = function(req, res, callback) {
 // method
 var streamHandler = function(req, res, callback) {
   try {
-    callback(req);
+    callback();
   } catch(err) {
     sendError(res, 500, 'Error in requestHandler callback, Error: ' + (err.stack || err.message) );
   }
@@ -392,6 +392,9 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // Method reference
       reference: method.name,
       methodObject: method.handle,
+      // Streaming flags
+      isReadStreaming: false,
+      isWriteStreaming: false,
     };
 
     // Helper functions this scope
@@ -434,7 +437,20 @@ WebApp.connectHandlers.use(function(req, res, next) {
         },
         addHeader: function(key, value) {
           self.headers[key] = value;
-        }
+        },
+        createReadStream: function() {
+          self.isReadStreaming = true;
+          return req;
+        },
+        createWriteStream: function() {
+          self.isWriteStreaming = true;
+          return res;
+        },
+        // getData: function() {
+        //   // XXX: TODO if we could run the request handler stuff eg.
+        //   // in here in a fiber sync it could be cool - and the user did
+        //   // not have to specify the stream=true flag?
+        // }
       };
 
       var methodCall = self.methodObject[self.method];
@@ -473,32 +489,55 @@ WebApp.connectHandlers.use(function(req, res, next) {
         if (self.statusCode === 200) {
           // Set headers
           _.each(self.headers, function(value, key) {
-            self.res.setHeader(key, value);
+            // If value is defined then set the header, this allows for unsetting
+            // the default content-type
+            if (typeof value !== 'undefined')
+              res.setHeader(key, value);
           });
-          // Check if we allow and have a stream
-          if (self.methodObject.stream && typeof result.pipe === 'function' && typeof result.on === 'function') {
-            // Simply pipe the data
-            result.pipe(self.res);
-            // TODO: Add stream error handler
-            // XXX: result.on('error', function() {})
-          } else {
-            // Or some data
-            var resultBuffer = new Buffer(result);
-            // Check if user wants to overwrite content length for some reason?
-            if (typeof self.headers['Content-Length'] === 'undefined') {
-              self.headers['Content-Length'] = resultBuffer.length;
-            }
-            // End response
-            self.res.end(resultBuffer);
 
+          // Return result
+          var resultBuffer = new Buffer(result);
+
+          // Check if user wants to overwrite content length for some reason?
+          if (typeof self.headers['Content-Length'] === 'undefined') {
+            self.headers['Content-Length'] = resultBuffer.length;
           }
+
+          // Check if we allow and have a stream and the user is read streaming
+          // Then
+          var streamsWaiting = 1;
+
+          // We wait until the user has finished reading
+          if (self.isReadStreaming) {
+            console.log('Read stream');
+            req.on('end', function() {
+              streamsWaiting--;
+              // If no streams are waiting
+              if (streamsWaiting == 0 && !self.isWriteStreaming) {
+                res.end(resultBuffer);
+              }
+            });
+
+          } else {
+            streamsWaiting--;
+          }
+
+          // We wait until the user has finished writing
+          if (self.isWriteStreaming) {
+            console.log('Write stream');
+          } else {
+            // If we are done reading the buffer - eg. not streaming
+            if (streamsWaiting == 0) res.end(resultBuffer);
+          }
+
+
         } else {
           // Set headers
           _.each(self.headers, function(value, key) {
             // If value is defined then set the header, this allows for unsetting
             // the default content-type
             if (typeof value !== 'undefined')
-              self.res.setHeader(key, value);
+              res.setHeader(key, value);
           });
           // Allow user to alter the status code and send a message
           sendError(res, self.statusCode, result);
