@@ -222,6 +222,7 @@ HTTP.methods = function(newMethods) {
           //   put:
           //   get:
           //   delete:
+          //   head:
           // }
 
           /*
@@ -232,6 +233,7 @@ HTTP.methods = function(newMethods) {
             put:
             get:
             delete:
+            head:
           }
           This way we have a uniform reference
           */
@@ -244,7 +246,8 @@ HTTP.methods = function(newMethods) {
               'POST': func,
               'PUT': func,
               'GET': func,
-              'DELETE': func
+              'DELETE': func,
+              'HEAD': func
             };
           } else {
             uniObj = {
@@ -253,7 +256,8 @@ HTTP.methods = function(newMethods) {
               'POST': func.post || func.method,
               'PUT': func.put || func.method,
               'GET': func.get || func.method,
-              'DELETE': func.delete || func.method
+              'DELETE': func.delete || func.method,
+              'HEAD': func.head || func.get || func.method
             };
           }
 
@@ -414,7 +418,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
         query: self.query,
         // Set params /foo/:name/test/:id -> { name: '', id: '' }
         params: self.params,
-        // Method GET, PUT, POST, DELETE
+        // Method GET, PUT, POST, DELETE, HEAD
         method: self.method,
         // User agent
         userAgent: req.headers['user-agent'],
@@ -494,6 +498,11 @@ WebApp.connectHandlers.use(function(req, res, next) {
             if (typeof value !== 'undefined')
               res.setHeader(key, value);
           });
+
+          if (self.method === "HEAD") {
+            res.end();
+            return;
+          }
 
           // Return result
           var resultBuffer = new Buffer(result);
