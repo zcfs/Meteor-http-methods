@@ -450,6 +450,19 @@ WebApp.connectHandlers.use(function(req, res, next) {
           self.isWriteStreaming = true;
           return res;
         },
+        Error: function(err) {
+
+          if (err instanceof Meteor.Error) {
+            // Return controlled error
+            sendError(res, err.error, err.message);
+          } else if (err instanceof Error) {
+            // Return error trace - this is not intented
+            sendError(res, 503, 'Error in method "' + self.reference + '", Error: ' + (err.stack || err.message) );
+          } else {
+            sendError(res, 503, 'Error in method "' + self.reference + '"' );
+          }
+
+        },
         // getData: function() {
         //   // XXX: TODO if we could run the request handler stuff eg.
         //   // in here in a fiber sync it could be cool - and the user did
