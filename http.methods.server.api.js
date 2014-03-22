@@ -367,7 +367,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
     return next();
   }
 
-  var dataHandle = (method.handle.stream)?streamHandler:requestHandler;
+  var dataHandle = (method.handle && method.handle.stream)?streamHandler:requestHandler;
 
   dataHandle(req, res, function(data) {
     // If methodsHandler not found or somehow the methodshandler is not a
