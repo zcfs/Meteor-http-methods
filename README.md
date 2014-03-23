@@ -28,6 +28,9 @@ The methods scope contains different kinds of inputs. We can also get user detai
 * `this.setContentType('text/html')` - Set the content type in header, defaults to text/html
 * `this.addHeader('Content-Disposition', 'attachment; filename="name.ext"')`
 * `this.setStatusCode(200)` - Set the status code in response header
+* `createReadStream` - If a request then get the read stream
+* `createWriteStream` - If you want to stream data to the client
+* `Error` - When streaming we have to be able to send error and close connection
 
 ##Passing data via header
 From the client:
