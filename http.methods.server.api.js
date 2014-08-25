@@ -21,7 +21,7 @@ _methodHTTP.methodTree = {};
 
 // This could be changed eg. could allow larger data chunks than 1.000.000
 // 5mb = 5 * 1024 * 1024 = 5242880;
-_methodHTTP.maxDataLength = 5242880; //1e6;
+HTTP.methodsMaxDataLength = 5242880; //1e6;
 
 _methodHTTP.nameFollowsConventions = function(name) {
   // Check that name is string, not a falsy or empty
@@ -297,7 +297,7 @@ var requestHandler = function(req, res, callback) {
     dataLen += data.length;
 
     // We have to check the data length in order to spare the server
-    if (dataLen > _methodHTTP.maxDataLength) {
+    if (dataLen > HTTP.methodsMaxDataLength) {
       dataLen = 0;
       bufferData = [];
       // Flood attack or faulty client

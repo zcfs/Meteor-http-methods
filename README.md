@@ -162,6 +162,13 @@ It's possible to make your own function to set the userId - not using the built-
 ```
 *The above resembles the builtin auth handler*
 
+## Security
+When buffering data instead of streaming we set the buffer limit to 5mb - This can be changed on the fly:
+```js
+  // Set the max data length
+  // 5mb = 5 * 1024 * 1024 = 5242880;
+  HTTP.methodsMaxDataLength = 5242880;
+```
 
 ## Login and logout (TODO)
 

@@ -1,4 +1,5 @@
 Package.describe({
+  version: '0.0.23',
     summary: 'Adds HTTP.methods RESTful'
 });
 
