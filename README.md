@@ -1,4 +1,4 @@
-HTTP.methods [![Build Status](https://travis-ci.org/CollectionFS/Meteor-http-methods.png?branch=master)](https://travis-ci.org/CollectionFS/Meteor-http-methods)
+cfs:http-methods [![Build Status](https://travis-ci.org/CollectionFS/Meteor-http-methods.png?branch=master)](https://travis-ci.org/CollectionFS/Meteor-http-methods)
 ============
 
 Add server-sde methods to the `HTTP` object your app. It's a server-side package only *- no client simulations added.*

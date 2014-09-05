@@ -1,10 +1,12 @@
 Package.describe({
-  version: '0.0.23',
-    summary: 'Adds HTTP.methods RESTful'
+  name: 'cfs:http-methods',
+  version: '0.0.24',
+  summary: 'Adds HTTP.methods RESTful'
 });
 
 Package.on_use(function(api) {
-  'use strict';
+  api.versionsFrom('METEOR@0.9.1');
+
   api.use(['webapp', 'underscore', 'ejson'], 'server');
 
   api.use('http', { weak: true });
@@ -19,7 +21,7 @@ Package.on_use(function(api) {
 });
 
 Package.on_test(function (api) {
-  api.use('http-methods', ['server']);
+  api.use('cfs:http-methods', ['server']);
   api.use('test-helpers', 'server');
   api.use(['tinytest', 'underscore', 'ejson', 'ordered-dict',
            'random', 'deps']);
