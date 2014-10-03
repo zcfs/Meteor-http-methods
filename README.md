@@ -73,8 +73,8 @@ Server
 ```js
   HTTP.methods({
     '/items/:itemId/emails/:emailId': function() {
-      // this.param.itemId === '12'
-      // this.param.emailId === '5'
+      // this.params.itemId === '12'
+      // this.params.emailId === '5'
     }
   });
 ```
