@@ -277,7 +277,11 @@ HTTP.methods = function(newMethods) {
 };
 
 var sendError = function(res, code, message) {
-  res.writeHead(code);
+  if (code) {
+    res.writeHead(code);
+  } else {
+    res.writeHead(500);
+  }
   res.end(message);
 };
 
