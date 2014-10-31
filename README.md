@@ -182,3 +182,6 @@ These operations are not currently supported for off Meteor use - there are some
 `token` the current `access_token` seems to be a better solution. Better control and options to logout users. But calling the initial `login` method still requires:
 * hashing of password
 * use https
+
+## HTTP Client-side usage
+If you want to use the HTTP client-side functionality and find yourself having a hard time viewing all available options; these can be found on https://docs.meteor.com/#/full/http.
