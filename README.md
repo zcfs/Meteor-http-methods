@@ -1,7 +1,7 @@
 cfs:http-methods [![Build Status](https://travis-ci.org/CollectionFS/Meteor-http-methods.png?branch=master)](https://travis-ci.org/CollectionFS/Meteor-http-methods)
 ============
 
-Add server-sde methods to the `HTTP` object your app. It's a server-side package only *- no client simulations added.*
+Add server-side methods to the `HTTP` object your app. It's a server-side package only *- no client simulations added.*
 
 ## Usage
 
@@ -31,7 +31,7 @@ The methods scope contains different kinds of inputs. We can also get user detai
 * `this.setContentType('text/html')` - set the content type in header, defaults to `text/html`
 * `this.addHeader('Content-Disposition', 'attachment; filename="name.ext"')`
 * `this.setStatusCode(200)` - set the status code in the response header
-* `createReadStream` - if a request then get the read stream
+* `createReadStream` - if a request, then get the read stream
 * `createWriteStream` - if you want to stream data to the client
 * `Error` - when streaming we have to be able to send error and close connection
 
@@ -59,7 +59,7 @@ HTTP Server method:
   });
 ```
 
-## Parametres
+## Parameters
 The method name or URL can be used to pass parameters to the method. The parameters are available on the server under `this.params`:
 
 Client
