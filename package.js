@@ -1,11 +1,12 @@
 Package.describe({
+  git: 'https://github.com/CollectionFS/Meteor-http-methods.git',
   name: 'cfs:http-methods',
   version: '0.0.24',
   summary: 'Adds HTTP.methods RESTful'
 });
 
-Package.on_use(function(api) {
-  api.versionsFrom('METEOR@0.9.1');
+Package.onUse(function(api) {
+  api.versionsFrom('1.0');
 
   api.use(['webapp', 'underscore', 'ejson'], 'server');
 
@@ -15,16 +16,16 @@ Package.on_use(function(api) {
 
   api.export && api.export('_methodHTTP', { testOnly: true });
 
-  api.add_files('http.methods.client.api.js', 'client');
-  api.add_files('http.methods.server.api.js', 'server');
+  api.addFiles('http.methods.client.api.js', 'client');
+  api.addFiles('http.methods.server.api.js', 'server');
 
 });
 
-Package.on_test(function (api) {
+Package.onTest(function (api) {
   api.use('cfs:http-methods', ['server']);
   api.use('test-helpers', 'server');
   api.use(['tinytest', 'underscore', 'ejson', 'ordered-dict',
            'random', 'deps']);
 
-  api.add_files('http.methods.tests.js', 'server');
+  api.addFiles('http.methods.tests.js', 'server');
 });
