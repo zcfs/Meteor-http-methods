@@ -360,6 +360,15 @@ var streamHandler = function(req, res, callback) {
   }
 };
 
+/*
+  Allow file uploads in cordova cfs
+*/
+var setCordovaHeaders = function(res) {
+  res.setHeader("Access-Control-Allow-Origin", "http://meteor.local");
+  res.setHeader("Access-Control-Allow-Methods", "PUT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+};
+
 // Handle the actual connection
 WebApp.connectHandlers.use(function(req, res, next) {
 
@@ -380,6 +389,9 @@ WebApp.connectHandlers.use(function(req, res, next) {
       sendError(res, 404, 'Error HTTP method handler "' + method.name + '" is not found');
       return;
     }
+
+    // Set CORS headers for Meteor Cordova clients
+    setCordovaHeaders(res);
 
     // Set fiber scope
     var fiberScope = {
