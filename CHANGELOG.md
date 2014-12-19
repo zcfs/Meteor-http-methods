@@ -25,6 +25,8 @@
 
 - 0.9.1 support
 
+Patches by GitHub users [@jkaan](https://github.com/jkaan), [@bradvogel](https://github.com/bradvogel), [@lukasvan3l](https://github.com/lukasvan3l).
+
 ## [v0.0.23] (https://github.com/CollectionFS/Meteor-http-methods/tree/v0.0.23)
 #### 25/08/14 by Morten Henriksen
 - *Fixed bug:* "Cannot transfer a file stream over 5Mb to the server." [#17](https://github.com/CollectionFS/Meteor-http-methods/issues/17)
@@ -32,6 +34,8 @@
 - *Merged pull-request:* "Add this.requestHeaders to readme" [#12](https://github.com/CollectionFS/Meteor-http-methods/issues/12) ([matthewsimo](https://github.com/matthewsimo))
 
 - Add this.requestHeaders to readme
+
+Patches by GitHub user [@matthewsimo](https://github.com/matthewsimo).
 
 ## [v0.0.22] (https://github.com/CollectionFS/Meteor-http-methods/tree/v0.0.22)
 #### 25/03/14 by Morten Henriksen
@@ -42,6 +46,8 @@
 - Typo fixes
 
 - Cosmetic fixes
+
+Patches by GitHub user [@dandv](https://github.com/dandv).
 
 ## [v0.0.21] (https://github.com/CollectionFS/Meteor-http-methods/tree/v0.0.21)
 #### 23/03/14 by Morten Henriksen
