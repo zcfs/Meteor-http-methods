@@ -189,6 +189,36 @@ _methodHTTP.getUserId = function() {
   return null;
 };
 
+/*
+
+Add default support for options
+
+*/
+_methodHTTP.defaultOptionsHandler = function(methodObject) {
+  // List of supported methods
+  var allowMethods = [];
+  // The final result object
+  var result = {};
+
+  // Iterate over the methods
+  // XXX: We should have a way to extend this - We should have some schema model
+  // for our methods...
+  _.each(methodObject, function(f, methodName) {
+    // Create an empty description
+    result[methodName] = { description: 'Empty', parameters: {} };
+    // Add method name to headers
+    allowMethods.push(methodName);
+  });
+
+  // Lets play nice
+  this.setStatusCode(200);
+
+  // We have to set some allow headers here
+  this.addHeader('Allow', allowMethods.join(','));
+
+  // Return json result - Pretty print
+  return JSON.stringify(result, null, '\t');
+};
 
 // Public interface for adding server-side http methods - if setting a method to
 // 'false' it would actually remove the method (can be used to unpublish a method)
@@ -247,7 +277,8 @@ HTTP.methods = function(newMethods) {
               'PUT': func,
               'GET': func,
               'DELETE': func,
-              'HEAD': func
+              'HEAD': func,
+              'OPTIONS': _methodHTTP.defaultOptionsHandler
             };
           } else {
             uniObj = {
@@ -257,7 +288,8 @@ HTTP.methods = function(newMethods) {
               'PUT': func.put || func.method,
               'GET': func.get || func.method,
               'DELETE': func.delete || func.method,
-              'HEAD': func.head || func.get || func.method
+              'HEAD': func.head || func.get || func.method,
+              'OPTIONS': func.options || _methodHTTP.defaultOptionsHandler
             };
           }
 
@@ -508,7 +540,11 @@ WebApp.connectHandlers.use(function(req, res, next) {
         var result;
         // Get a result back to send to the client
         try {
-          result = methodCall.apply(thisScope, [self.data]) || '';
+          if (self.method == 'OPTIONS') {
+            result = methodCall.apply(thisScope, [methodObject]) || '';
+          } else {
+            result = methodCall.apply(thisScope, [self.data]) || '';
+          }
         } catch(err) {
           if (err instanceof Meteor.Error) {
             // Return controlled error
