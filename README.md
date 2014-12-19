@@ -34,6 +34,7 @@ The methods scope contains different kinds of inputs. We can also get user detai
 * `createReadStream` - if a request, then get the read stream
 * `createWriteStream` - if you want to stream data to the client
 * `Error` - when streaming we have to be able to send error and close connection
+* `this.request` The original request object
 
 ## Passing data via header
 
