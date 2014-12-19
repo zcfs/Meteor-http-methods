@@ -546,7 +546,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
         // Get a result back to send to the client
         try {
           if (self.method == 'OPTIONS') {
-            result = methodCall.apply(thisScope, [methodObject]) || '';
+            result = methodCall.apply(thisScope, [self.methodObject]) || '';
           } else {
             result = methodCall.apply(thisScope, [self.data]) || '';
           }
