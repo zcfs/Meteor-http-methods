@@ -204,10 +204,15 @@ _methodHTTP.defaultOptionsHandler = function(methodObject) {
   // XXX: We should have a way to extend this - We should have some schema model
   // for our methods...
   _.each(methodObject, function(f, methodName) {
-    // Create an empty description
-    result[methodName] = { description: 'Empty', parameters: {} };
-    // Add method name to headers
-    allowMethods.push(methodName);
+    // Skip the stream and auth functions - they are not public / accessible
+    if (methodName !== 'stream' && methodName !== 'auth') {
+
+      // Create an empty description
+      result[methodName] = { description: '', parameters: {} };
+      // Add method name to headers
+      allowMethods.push(methodName);
+
+    }
   });
 
   // Lets play nice
