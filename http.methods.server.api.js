@@ -189,6 +189,9 @@ _methodHTTP.getUserId = function() {
   return null;
 };
 
+// Expose the default auth for calling from custom authentication handlers.
+HTTP.defaultAuth = _methodHTTP.getUserId;
+
 /*
 
 Add default support for options
