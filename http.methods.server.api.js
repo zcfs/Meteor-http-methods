@@ -452,14 +452,14 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // Method reference
       reference: method.name,
       methodObject: method.handle,
-      // Streaming flags
-      isReadStreaming: false,
-      isWriteStreaming: false,
+      _streamsWaiting: 0
     };
 
     // Helper functions this scope
     Fiber = Npm.require('fibers');
     runServerMethod = Fiber(function(self) {
+      var result, resultBuffer;
+
       // We fetch methods data from methodsHandler, the handler uses the this.addItem()
       // function to populate the methods, this way we have better check control and
       // better error handling + messages
@@ -501,11 +501,11 @@ WebApp.connectHandlers.use(function(req, res, next) {
           self.headers[key] = value;
         },
         createReadStream: function() {
-          self.isReadStreaming = true;
+          self._streamsWaiting++;
           return req;
         },
         createWriteStream: function() {
-          self.isWriteStreaming = true;
+          self._streamsWaiting++;
           return res;
         },
         Error: function(err) {
@@ -528,6 +528,22 @@ WebApp.connectHandlers.use(function(req, res, next) {
         // }
       };
 
+      // This function sends the final response. Depending on the
+      // timing of the streaming, we might have to wait for all
+      // streaming to end, or we might have to wait for this function
+      // to finish after streaming ends. The checks in this function
+      // and the fact that we call it twice ensure that we will always
+      // send the response if we haven't sent an error response, but
+      // we will not send it too early.
+      function sendResponseIfDone() {
+        // If no streams are waiting
+        if (self._streamsWaiting === 0 &&
+            self.statusCode === 200 &&
+            self.done) {
+          res.end(resultBuffer);
+        }
+      }
+
       var methodCall = self.methodObject[self.method];
 
       // If the method call is set for the POST/PUT/GET or DELETE then run the
@@ -544,9 +560,15 @@ WebApp.connectHandlers.use(function(req, res, next) {
           return;
         }
 
+        // This must be attached before there's any chance of `createReadStream`
+        // or `createWriteStream` being called, which means before we do
+        // `methodCall.apply` below.
+        req.on('end', function() {
+          self._streamsWaiting--;
+          sendResponseIfDone();
+        });
+
         // Get the result of the methodCall
-        var result;
-        // Get a result back to send to the client
         try {
           if (self.method == 'OPTIONS') {
             result = methodCall.apply(thisScope, [self.methodObject]) || '';
@@ -564,65 +586,35 @@ WebApp.connectHandlers.use(function(req, res, next) {
           return;
         }
 
+        // Set headers
+        _.each(self.headers, function(value, key) {
+          // If value is defined then set the header, this allows for unsetting
+          // the default content-type
+          if (typeof value !== 'undefined')
+            res.setHeader(key, value);
+        });
+
         // If OK / 200 then Return the result
         if (self.statusCode === 200) {
-          // Set headers
-          _.each(self.headers, function(value, key) {
-            // If value is defined then set the header, this allows for unsetting
-            // the default content-type
-            if (typeof value !== 'undefined')
-              res.setHeader(key, value);
-          });
 
-          if (self.method === "HEAD") {
-            res.end();
-            return;
+          if (self.method !== "HEAD") {
+            // Return result
+            if (typeof result === 'string') {
+              resultBuffer = new Buffer(result);
+            } else {
+              resultBuffer = new Buffer(JSON.stringify(result));
+            }
+
+            // Check if user wants to overwrite content length for some reason?
+            if (typeof self.headers['Content-Length'] === 'undefined') {
+              self.headers['Content-Length'] = resultBuffer.length;
+            }
           }
 
-          // Return result
-          var resultBuffer = new Buffer(result);
-
-          // Check if user wants to overwrite content length for some reason?
-          if (typeof self.headers['Content-Length'] === 'undefined') {
-            self.headers['Content-Length'] = resultBuffer.length;
-          }
-
-          // Check if we allow and have a stream and the user is read streaming
-          // Then
-          var streamsWaiting = 1;
-
-          // We wait until the user has finished reading
-          if (self.isReadStreaming) {
-            // console.log('Read stream');
-            req.on('end', function() {
-              streamsWaiting--;
-              // If no streams are waiting
-              if (streamsWaiting == 0 && !self.isWriteStreaming) {
-                res.end(resultBuffer);
-              }
-            });
-
-          } else {
-            streamsWaiting--;
-          }
-
-          // We wait until the user has finished writing
-          if (self.isWriteStreaming) {
-            // console.log('Write stream');
-          } else {
-            // If we are done reading the buffer - eg. not streaming
-            if (streamsWaiting == 0) res.end(resultBuffer);
-          }
-
+          self.done = true;
+          sendResponseIfDone();
 
         } else {
-          // Set headers
-          _.each(self.headers, function(value, key) {
-            // If value is defined then set the header, this allows for unsetting
-            // the default content-type
-            if (typeof value !== 'undefined')
-              res.setHeader(key, value);
-          });
           // Allow user to alter the status code and send a message
           sendError(res, self.statusCode, result);
         }
