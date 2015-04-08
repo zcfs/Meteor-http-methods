@@ -1,6 +1,11 @@
 # Changelog
 
 ## vCurrent
+
+## [v0.0.28]
+#### 8/4/15 by Eric Dobbertin
+- Fix issue where response would not be sent when using streams
+
 ## [v0.0.26] (https://github.com/CollectionFS/Meteor-http-methods/tree/v0.0.26)
 #### 17/12/14 by Morten Henriksen
 - mbr update, remove versions.json
