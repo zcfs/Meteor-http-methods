@@ -9,6 +9,7 @@ DELETE /note/:id
 */
 HTTP = Package.http && Package.http.HTTP || {};
 
+// XXX url and stream are not used?
 var url = Npm.require('url');
 var stream = Npm.require('stream');
 
@@ -62,7 +63,6 @@ _methodHTTP.addToMethodTree = function(methodName) {
   var currentMethodTree = _methodHTTP.methodTree;
 
   for (var i = 0; i < list.length; i++) {
-    var lastListItem = (i === list.length - 1);
 
     // get the key name
     var key = list[i];
@@ -377,9 +377,7 @@ var requestHandler = function(req, res, callback) {
           // Could not parse so we return the raw data
         }
       }
-    } else {
-      // Result will be undefined
-    }
+    } // Else result will be undefined
 
     try {
       callback(result);
@@ -571,7 +569,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
         // Get the result of the methodCall
         try {
-          if (self.method == 'OPTIONS') {
+          if (self.method === 'OPTIONS') {
             result = methodCall.apply(thisScope, [self.methodObject]) || '';
           } else {
             result = methodCall.apply(thisScope, [self.data]) || '';

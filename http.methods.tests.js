@@ -1,5 +1,5 @@
 function equals(a, b) {
-  return !!(EJSON.stringify(a) === EJSON.stringify(b));
+  return EJSON.stringify(a) === EJSON.stringify(b);
 }
 
 Tinytest.add('http-methods - test environment', function(test) {
