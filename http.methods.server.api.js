@@ -536,9 +536,10 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // send the response if we haven't sent an error response, but
       // we will not send it too early.
       function sendResponseIfDone() {
+          res.statusCode = self.statusCode;
         // If no streams are waiting
         if (self._streamsWaiting === 0 &&
-            self.statusCode === 200 &&
+            (self.statusCode === 200 || self.statusCode === 206) &&
             self.done) {
           res.end(resultBuffer);
         }
@@ -595,7 +596,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
         });
 
         // If OK / 200 then Return the result
-        if (self.statusCode === 200) {
+        if (self.statusCode === 200 || self.statusCode === 206) {
 
           if (self.method !== "HEAD") {
             // Return result
@@ -609,6 +610,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
             if (typeof self.headers['Content-Length'] === 'undefined') {
               self.headers['Content-Length'] = resultBuffer.length;
             }
+
           }
 
           self.done = true;
