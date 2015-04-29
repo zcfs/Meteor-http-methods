@@ -1,4 +1,2 @@
-/versions.json
 .build*
-
-versions.json
+/.versions

@@ -2,6 +2,10 @@
 
 ## vCurrent
 
+## [v0.0.29]
+#### 29/4/15 by Eric Dobbertin
+- Respond properly to 206 Range requests (thanks [cherbst](https://github.com/cherbst))
+
 ## [v0.0.28]
 #### 8/4/15 by Eric Dobbertin
 - Fix issue where response would not be sent when using streams
