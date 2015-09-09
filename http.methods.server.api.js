@@ -9,10 +9,6 @@ DELETE /note/:id
 */
 HTTP = Package.http && Package.http.HTTP || {};
 
-// XXX url and stream are not used?
-var url = Npm.require('url');
-var stream = Npm.require('stream');
-
 // Primary local test scope
 _methodHTTP = {};
 
@@ -534,11 +530,14 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // send the response if we haven't sent an error response, but
       // we will not send it too early.
       function sendResponseIfDone() {
-          res.statusCode = self.statusCode;
+        res.statusCode = self.statusCode;
         // If no streams are waiting
         if (self._streamsWaiting === 0 &&
             (self.statusCode === 200 || self.statusCode === 206) &&
-            self.done) {
+            self.done &&
+            !self._responseSent &&
+            !res.finished) {
+          self._responseSent = true;
           res.end(resultBuffer);
         }
       }
