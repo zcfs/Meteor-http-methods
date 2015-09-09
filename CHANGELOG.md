@@ -2,6 +2,10 @@
 
 ## vCurrent
 
+## [v0.0.30]
+#### 9/9/15 by Eric Dobbertin
+- Ensure we do not try to end responses twice
+
 ## [v0.0.29]
 #### 29/4/15 by Eric Dobbertin
 - Respond properly to 206 Range requests (thanks [cherbst](https://github.com/cherbst))
