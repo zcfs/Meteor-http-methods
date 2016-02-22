@@ -109,7 +109,8 @@ Example:
       //    };
       //    // Print the options in pretty json
       //    return JSON.stringify(options, null, '\t');
-      //  }
+      //  },
+      //  stream: true // flag whether to allow stream handling in the request
     }
   });
 ```
