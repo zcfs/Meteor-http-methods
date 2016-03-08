@@ -397,10 +397,17 @@ var streamHandler = function(req, res, callback) {
 /*
   Allow file uploads in cordova cfs
 */
-var setCordovaHeaders = function(res) {
-  res.setHeader("Access-Control-Allow-Origin", "http://meteor.local");
-  res.setHeader("Access-Control-Allow-Methods", "PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+var setCordovaHeaders = function(request, response) {
+  var origin = request.headers.origin;
+  // Match http://localhost:<port> for Cordova clients in Meteor 1.3
+  // and http://meteor.local for earlier versions
+  if (origin && (origin === 'http://meteor.local' || /^http:\/\/localhost/.test(origin))) {
+    // We need to echo the origin provided in the request
+    response.setHeader("Access-Control-Allow-Origin", origin);
+
+    response.setHeader("Access-Control-Allow-Methods", "PUT");
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
 };
 
 // Handle the actual connection
@@ -425,7 +432,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
     }
 
     // Set CORS headers for Meteor Cordova clients
-    setCordovaHeaders(res);
+    setCordovaHeaders(req, res);
 
     // Set fiber scope
     var fiberScope = {
