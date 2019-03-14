@@ -1,6 +1,13 @@
 cfs:http-methods [![Build Status](https://travis-ci.org/CollectionFS/Meteor-http-methods.png?branch=master)](https://travis-ci.org/CollectionFS/Meteor-http-methods)
 ============
 
+~~Looking for maintainers - please reach out!~~
+This package is to be archived due to inability to find contributors, thanks to everyone who helped make it possible.
+
+**If you're looking for an alternative, we highly recommend [Meteor-Files](https://github.com/VeliovGroup/Meteor-Files) by [VeliovGroup](https://github.com/VeliovGroup)**
+
+---
+
 Add server-side methods to the `HTTP` object your app. It's a server-side package only *- no client simulations added.*
 
 ## Usage
