@@ -1,6 +1,6 @@
 Package.describe({
-  git: 'https://github.com/CollectionFS/Meteor-http-methods.git',
-  name: 'cfs:http-methods',
+  git: 'https://github.com/zcfs/Meteor-http-methods.git',
+  name: 'zcfs:http-methods',
   version: '0.0.32',
   summary: 'Adds HTTP.methods RESTful'
 });
@@ -22,7 +22,7 @@ Package.onUse(function(api) {
 });
 
 Package.onTest(function (api) {
-  api.use('cfs:http-methods', ['server']);
+  api.use('zcfs:http-methods', ['server']);
   api.use('test-helpers', 'server');
   api.use(['tinytest', 'underscore', 'ejson', 'ordered-dict',
            'random', 'deps']);
